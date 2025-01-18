@@ -1,7 +1,12 @@
 import math
+import os
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from scipy.stats import norm
+from flask import Flask, send_file
+
+# Flask app setup
+app = Flask(__name__)
 
 # Function to calculate ITM probability
 def calculate_itm_probability(S, K, T, r, sigma, option_type='call'):
@@ -95,6 +100,13 @@ def create_animation(output_file="animation.gif"):
     ani.save(output_file, writer="imagemagick")  # Save the animation as a GIF
     print(f"Animation saved as {output_file}")
 
-# Main execution
+# Flask route to serve the animation
+@app.route("/")
+def serve_animation():
+    if not os.path.exists("animation.gif"):
+        create_animation("animation.gif")  # Generate the animation if it doesn't exist
+    return send_file("animation.gif", mimetype="image/gif")
+
 if __name__ == "__main__":
-    create_animation("animation.gif")
+    port = int(os.environ.get("PORT", 5000))  # Use PORT from environment variable
+    app.run(host="0.0.0.0", port=port)
